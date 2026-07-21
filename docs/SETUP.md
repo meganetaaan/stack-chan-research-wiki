@@ -34,12 +34,16 @@ GitHubのSettingsからPagesのSourceをGitHub Actionsに設定する。`deploy-
 
 Repository secretsへ次の認証情報を登録する。
 
-- `OPENALEX_API_KEY`: OpenAlexのAPIキー
-- `OPENALEX_MAILTO`: API利用者の連絡先メールアドレス
+- `OPENALEX_API_KEY`: OpenAlexの無料APIキー（必須）
+- `API_CONTACT_EMAIL`: Crossref Event Dataへ通知する連絡先メールアドレス（任意）
 - `SEMANTIC_SCHOLAR_API_KEY`: Semantic ScholarのAPIキー（任意）
 - `X_BEARER_TOKEN`: X APIのBearer Token（任意、従量課金）
 
 Semantic ScholarはAPIキーがなくても取得を試み、制限された場合は警告を記録して処理を継続する。
+
+OpenAlexのAPIキーは https://openalex.org/settings/api で取得する。
+
+2026年2月にOpenAlexの `mailto` パラメーターは廃止されたため、連絡先メールアドレスはOpenAlexへ送信しない。
 
 XはBearer Tokenがない場合に無効化され、OpenAlex、Semantic Scholar、Crossref Event Dataだけで収集を続ける。
 

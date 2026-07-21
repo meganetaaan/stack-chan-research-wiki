@@ -92,8 +92,6 @@ def fetch_openalex(
     }
     if api_key := os.environ.get("OPENALEX_API_KEY"):
         params["api_key"] = api_key
-    if mailto := os.environ.get("OPENALEX_MAILTO"):
-        params["mailto"] = mailto
     response = requests.get(OPENALEX_API_URL, params=params, timeout=30)
     response.raise_for_status()
     return response.json().get("results", [])
@@ -231,7 +229,7 @@ def enrich_reddit(
             "until-occurred-date": end.isoformat(),
             "rows": 0,
         }
-        if mailto := os.environ.get("OPENALEX_MAILTO"):
+        if mailto := os.environ.get("API_CONTACT_EMAIL"):
             params["mailto"] = mailto
         try:
             response = requests.get(EVENT_DATA_API_URL, params=params, timeout=ENRICHMENT_TIMEOUT)

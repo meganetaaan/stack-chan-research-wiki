@@ -33,6 +33,8 @@ Semantic Scholar、Crossref Event Data、Xの障害は警告として記録す�
 
 同じ外部サービスへの後続リクエストはスキップし、OpenAlexによる候補収集を継続する。
 
+Scheduled Actionsは無料の `OPENALEX_API_KEY` を必須とし、設定がなければ収集前に停止する。
+
 定量指標は注目度を示す補助情報であり、研究結果の妥当性やｽﾀｯｸﾁｬﾝへの適用可能性を保証しない。
 
 ## ChatGPT scheduled tasks
