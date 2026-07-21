@@ -32,4 +32,17 @@ GitHubのSettingsからPagesのSourceをGitHub Actionsに設定する。`deploy-
 
 ## 5. 定期文献収集
 
-Repository secretsへ必要なAPIキーを登録する。初期状態では収集スクリプトはOpenAlex互換APIを想定しているが、運用開始前に利用規約と現在の認証方式を確認する。
+Repository secretsへ次の認証情報を登録する。
+
+- `OPENALEX_API_KEY`: OpenAlexのAPIキー
+- `OPENALEX_MAILTO`: API利用者の連絡先メールアドレス
+- `SEMANTIC_SCHOLAR_API_KEY`: Semantic ScholarのAPIキー（任意）
+- `X_BEARER_TOKEN`: X APIのBearer Token（任意、従量課金）
+
+Semantic ScholarはAPIキーがなくても取得を試み、制限された場合は警告を記録して処理を継続する。
+
+XはBearer Tokenがない場合に無効化され、OpenAlex、Semantic Scholar、Crossref Event Dataだけで収集を続ける。
+
+Redditの言及数はCrossref Event Dataから取得するため、Redditの認証情報は不要である。
+
+APIの利用規約と料金は運用開始時と定期的な保守時に確認する。

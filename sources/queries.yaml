@@ -53,5 +53,17 @@ filters:
   languages:
   - en
   - ja
-  from_year_for_periodic_search: 2024
+  lookback_days: 30
   max_candidates_per_query: 20
+  max_review_candidates: 10
+  relevance_reserve: 3
+enrichment:
+  semantic_scholar: true
+  crossref_reddit: true
+  x: true
+  max_candidates: 20
+  request_delay_seconds: 0.2
+attention_thresholds:
+  min_citations: 1
+  min_reddit_mentions: 1
+  min_x_original_posts: 3

@@ -20,4 +20,4 @@ build:
 	mkdocs build --strict
 
 collect:
-	python scripts/collect_openalex.py
+	python scripts/collect_papers.py

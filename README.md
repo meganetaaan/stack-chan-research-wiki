@@ -26,6 +26,18 @@ python scripts/validate_wiki.py
 mkdocs serve
 ```
 
+## 文献候補を収集する
+
+```bash
+python scripts/collect_papers.py
+```
+
+過去30日間の候補をOpenAlexから取得し、Semantic Scholarの引用数とCrossref Event DataのReddit言及数を付与します。
+
+`X_BEARER_TOKEN` が設定されている場合は、X上の直近7日間の原投稿数も取得します。
+
+候補は `sources/inbox/` に保存され、定量指標と検索語の一致数から最大10件のレビューキューが生成されます。
+
 ## 新しい論文を追加する
 
 ```bash

@@ -23,12 +23,14 @@ jobs:
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
-        run: python scripts/collect_openalex.py
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        run: python scripts/collect_papers.py
       - name: Create pull request
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain sources/inbox)" ]; then
             exit 0
           fi
           branch="automation/literature-$(date +%Y-%m-%d)"
@@ -39,7 +41,8 @@ jobs:
           git commit -m "chore: collect literature candidates"
           git push origin "$branch"
           gh pr create \
+            --draft \
             --title "Literature candidates $(date +%Y-%m-%d)" \
-            --body "Automated metadata collection. No wiki claims were changed." \
+            --body "30-day candidate collection with citation and social-attention signals. No wiki claims were changed." \
             --base main \
             --head "$branch"
