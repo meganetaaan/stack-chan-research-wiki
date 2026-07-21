@@ -1,0 +1,57 @@
+themes:
+  human_robot_interaction:
+  - '"human robot interaction" social robot'
+  - anthropomorphism robot trust engagement
+  dialogue_language:
+  - '"spoken dialogue system" robot'
+  - turn-taking robot conversation
+  - large language model social robot
+  multimodal_interaction:
+  - multimodal interaction social robot
+  - gaze gesture joint attention robot
+  embodiment_expression:
+  - expressive motion social robot
+  - minimal embodiment robot communication
+  affect_relationships:
+  - attachment companion robot
+  - long-term relationship social robot
+  appearance_character:
+  - kawaii robot
+  - cuteness robot
+  - baby schema robot design
+  - character design social robot
+  embedded_ai:
+  - embedded AI social robot
+  - TinyML speech robot
+  - on-device language model robot
+  social_deployment:
+  - companion robot field study
+  - social robot longitudinal deployment
+  - domestic robot adoption
+  open_source_hardware:
+  - open source hardware robotics
+  - open design social robot
+  - modular open hardware robot
+  maker_culture:
+  - maker culture robotics
+  - DIY robot user innovation
+  - robot appropriation remix
+  oss_communities:
+  - open source robotics community
+  - commons based peer production hardware
+  - maintainer work open source
+  fandom_oshikatsu:
+  - oshikatsu fan studies
+  - participatory culture character fandom
+  - parasocial relationship robot character
+  - fan labor community ritual
+  ethics_sustainability:
+  - social robot privacy ethics
+  - robot service shutdown right to repair
+  - sustainable companion robot
+filters:
+  languages:
+  - en
+  - ja
+  from_year_for_periodic_search: 2024
+  max_candidates_per_query: 20

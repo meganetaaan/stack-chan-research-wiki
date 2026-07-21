@@ -1,0 +1,35 @@
+name: Monthly health check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 0 1 * *"
+      timezone: "Asia/Tokyo"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Run checks
+        id: check
+        continue-on-error: true
+        run: |
+          python scripts/validate_wiki.py > health-check.txt 2>&1
+      - name: Open issue when checks fail
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Monthly wiki health check failed" \
+            --label "maintenance" \
+            --body-file health-check.txt

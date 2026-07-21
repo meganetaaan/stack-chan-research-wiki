@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Paper frontmatter schema",
+  "type": "object",
+  "required": [
+    "type",
+    "id",
+    "title",
+    "year",
+    "verification_status",
+    "domains",
+    "topics",
+    "stackchan_relevance"
+  ],
+  "properties": {
+    "type": {
+      "const": "paper"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "verification_status": {
+      "enum": [
+        "candidate",
+        "abstract_checked",
+        "fulltext_checked",
+        "human_reviewed",
+        "superseded"
+      ]
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "human-robot-interaction",
+          "dialogue-and-language",
+          "multimodal-interaction",
+          "embodiment-and-expression",
+          "affect-and-relationships",
+          "appearance-and-character-design",
+          "cognition-and-agent-architecture",
+          "robot-learning-and-adaptation",
+          "hardware-and-embedded-intelligence",
+          "applications-and-social-deployment",
+          "evaluation-and-research-methods",
+          "ethics-governance-and-sustainability",
+          "open-source-hardware-and-fabrication",
+          "maker-culture-and-user-innovation",
+          "oss-communities-and-commons",
+          "participatory-culture-and-fandom"
+        ]
+      }
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "contexts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "populations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "modalities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "doi": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "arxiv_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "crid": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stackchan_relevance": {
+      "type": "object",
+      "required": [
+        "level",
+        "applicability",
+        "rationale"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "applicability": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "direct",
+              "design-hypothesis",
+              "background",
+              "out-of-scope"
+            ]
+          }
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "face",
+              "display",
+              "servo-motion",
+              "speech",
+              "audio-input",
+              "dialogue",
+              "memory",
+              "camera",
+              "sensors",
+              "enclosure",
+              "power",
+              "connectivity",
+              "extensions",
+              "documentation",
+              "community",
+              "events"
+            ]
+          }
+        },
+        "rationale": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

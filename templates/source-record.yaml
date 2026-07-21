@@ -1,0 +1,16 @@
+id: "doi:10.0000/example"
+title: ""
+authors: []
+year: null
+identifiers:
+  doi: null
+  arxiv: null
+  crid: null
+  openalex: null
+urls:
+  publisher: null
+  open_access: null
+publication_status: ""
+verification_status: candidate
+retrieved_at: null
+notes: []

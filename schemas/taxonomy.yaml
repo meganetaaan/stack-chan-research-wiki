@@ -1,0 +1,202 @@
+version: 1
+domains:
+  human-robot-interaction: 人間がロボットをどのように認知し、信頼し、受容し、協働するか
+  dialogue-and-language: 音声認識、音声合成、対話管理、ターンテイキング、LLM、言語行動
+  multimodal-interaction: 視線、顔、姿勢、動作、音声など複数モダリティの統合
+  embodiment-and-expression: 身体性、動き、タイミング、最小自由度による表現
+  affect-and-relationships: 感情、人格、共感、愛着、コンパニオンシップ、長期関係
+  appearance-and-character-design: かわいい、kawaii、cuteness、顔、目、キャラクター、外観
+  cognition-and-agent-architecture: 認知、記憶、計画、ユーザモデル、エージェント構成
+  robot-learning-and-adaptation: 学習、適応、パーソナライズ、継続学習
+  hardware-and-embedded-intelligence: 組み込みAI、TinyML、音響、制御、低消費電力、センサ
+  applications-and-social-deployment: 家庭、教育、福祉、展示、接客、長期導入、離脱
+  evaluation-and-research-methods: 実験、フィールド調査、尺度、ログ分析、再現性
+  ethics-governance-and-sustainability: 倫理、プライバシー、安全、修理可能性、サービス終了
+  open-source-hardware-and-fabrication: オープンソースハードウェア、設計公開、3Dプリント、モジュール化
+  maker-culture-and-user-innovation: Maker文化、DIY、改造、ユーザーイノベーション、ファブラボ
+  oss-communities-and-commons: OSSコミュニティ、共同生産、ガバナンス、保守、知識共有
+  participatory-culture-and-fandom: 推し活、ファンダム、参加型文化、ファン労働、キャラクターへの愛着
+topics:
+- anthropomorphism
+- social-presence
+- trust
+- acceptance
+- engagement
+- proxemics
+- speech-recognition
+- speech-synthesis
+- spoken-dialogue
+- dialogue-management
+- turn-taking
+- incremental-dialogue
+- dialogue-repair
+- backchannel
+- large-language-models
+- gaze
+- facial-expression
+- gesture
+- head-motion
+- joint-attention
+- multimodal-fusion
+- expressive-motion
+- motion-timing
+- minimal-embodiment
+- physical-presence
+- empathy
+- personality
+- rapport
+- attachment
+- companionship
+- long-term-interaction
+- kawaii
+- cuteness
+- baby-schema
+- neoteny
+- character-design
+- mascot-design
+- memory
+- user-modeling
+- planning
+- tool-use
+- multi-agent-interaction
+- personalization
+- continual-learning
+- preference-learning
+- behavior-adaptation
+- embedded-ai
+- edge-ai
+- tinyml
+- voice-activity-detection
+- echo-cancellation
+- on-device-llm
+- companion-robots
+- education
+- children
+- older-adults
+- healthcare
+- retail
+- museums
+- field-study
+- longitudinal-study
+- participatory-design
+- co-design
+- ethnography
+- reproducibility
+- privacy
+- safety
+- emotional-dependency
+- right-to-repair
+- service-shutdown
+- open-source-hardware
+- open-design
+- modular-hardware
+- digital-fabrication
+- 3d-printing
+- maker-culture
+- diy
+- hacking
+- user-innovation
+- appropriation
+- remix
+- open-source-community
+- commons-based-peer-production
+- community-governance
+- maintainer-work
+- documentation-practices
+- distributed-maintenance
+- knowledge-commons
+- oshikatsu
+- fandom
+- participatory-culture
+- fan-labor
+- gift-economy
+- parasocial-relationship
+- community-of-practice
+- collective-identity
+- ritual-and-celebration
+methods:
+- laboratory-experiment
+- field-study
+- longitudinal-study
+- survey
+- interview
+- focus-group
+- ethnography
+- participatory-design
+- co-design
+- design-study
+- systematic-review
+- meta-analysis
+- technical-system
+- case-study
+- interaction-log-analysis
+- content-analysis
+- network-analysis
+contexts:
+- home
+- school
+- care-facility
+- hospital
+- museum
+- exhibition
+- retail
+- workplace
+- public-space
+- online-community
+- maker-event
+- hackathon
+- open-source-project
+- fan-community
+populations:
+- children
+- teenagers
+- adults
+- older-adults
+- families
+- care-staff
+- teachers
+- makers
+- developers
+- maintainers
+- fans
+- community-organizers
+modalities:
+- speech
+- audio
+- text
+- gaze
+- face
+- head-motion
+- body-motion
+- touch
+- vision
+- proximity
+- light
+stackchan_components:
+- face
+- display
+- servo-motion
+- speech
+- audio-input
+- dialogue
+- memory
+- camera
+- sensors
+- enclosure
+- power
+- connectivity
+- extensions
+- documentation
+- community
+- events
+applicability:
+- direct
+- design-hypothesis
+- background
+- out-of-scope
+verification_status:
+- candidate
+- abstract_checked
+- fulltext_checked
+- human_reviewed
+- superseded

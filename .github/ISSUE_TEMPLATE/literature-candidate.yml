@@ -1,0 +1,41 @@
+name: Literature candidate
+description: Wikiへ追加したい研究文献を提案する
+title: "[Paper] "
+labels: ["literature-candidate"]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+    validations:
+      required: true
+  - type: input
+    id: identifier
+    attributes:
+      label: DOI / arXiv / CRID / URL
+    validations:
+      required: true
+  - type: textarea
+    id: relevance
+    attributes:
+      label: ｽﾀｯｸﾁｬﾝとの関連性
+    validations:
+      required: true
+  - type: dropdown
+    id: domain
+    attributes:
+      label: 主な領域
+      options:
+        - Human–Robot Interaction
+        - Dialogue and language
+        - Multimodal interaction
+        - Embodiment and expression
+        - Affect and relationships
+        - Appearance and character design
+        - Embedded intelligence
+        - Social deployment
+        - Open-source hardware
+        - Maker culture
+        - OSS communities
+        - Participatory culture and fandom
+        - Ethics and sustainability

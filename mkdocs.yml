@@ -1,0 +1,38 @@
+site_name: Stack-chan Research Wiki
+site_description: Academic knowledge around Stack-chan, social robotics, open hardware and participatory culture
+
+docs_dir: wiki
+site_dir: site
+
+repo_name: stack-chan-research-wiki
+
+nav:
+  - ホーム: index.md
+  - 研究領域マップ: research-map.md
+  - 論文: papers/index.md
+  - トピック: topics/index.md
+  - ロボット: robots/index.md
+  - 研究方法: methods/index.md
+  - 横断レビュー: synthesis/index.md
+  - 未解決問題: open-questions.md
+  - 更新履歴: log.md
+
+theme:
+  name: material
+  language: ja
+  features:
+    - navigation.indexes
+    - navigation.sections
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true

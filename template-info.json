@@ -1,0 +1,29 @@
+{
+  "template_name": "stack-chan-research-wiki",
+  "created": "2026-07-21",
+  "recommended_repository_names": [
+    "stack-chan-research-wiki",
+    "stack-chan-research-atlas",
+    "stack-chan-knowledge",
+    "stack-chan-academic-wiki",
+    "stack-chan-papers"
+  ],
+  "domains": [
+    "human-robot-interaction",
+    "dialogue-and-language",
+    "multimodal-interaction",
+    "embodiment-and-expression",
+    "affect-and-relationships",
+    "appearance-and-character-design",
+    "cognition-and-agent-architecture",
+    "robot-learning-and-adaptation",
+    "hardware-and-embedded-intelligence",
+    "applications-and-social-deployment",
+    "evaluation-and-research-methods",
+    "ethics-governance-and-sustainability",
+    "open-source-hardware-and-fabrication",
+    "maker-culture-and-user-innovation",
+    "oss-communities-and-commons",
+    "participatory-culture-and-fandom"
+  ]
+}
