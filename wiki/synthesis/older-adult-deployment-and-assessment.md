@@ -2,6 +2,7 @@
 type: synthesis
 id: older-adult-deployment-and-assessment
 title: "高齢者ケアにおけるコミュニケーションロボットの導入と評価"
+year: 2026
 verification_status: fulltext_checked
 ---
 
