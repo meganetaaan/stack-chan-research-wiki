@@ -4,7 +4,10 @@ id: field-study
 title: "Field Study"
 aliases: []
 domains: []
-related_topics: []
+related_topics:
+  - older-adults
+  - healthcare
+  - longitudinal-study
 verification_status: candidate
 ---
 
@@ -28,8 +31,9 @@ verification_status: candidate
 
 ## ｽﾀｯｸﾁｬﾝへの示唆
 
-未整理。
+現場での試行では、利用結果だけでなく、職員の準備負担、保管場所、拒否、観測不能な失敗を記録する。
 
 ## 主要文献
 
-未登録。
+- [[../papers/doi-10-1007-s00391-026-02616-8|Moflinの高齢者施設フィールド研究]]
+- [[../papers/arxiv-2607-15156|社会ロボットによるフレイル評価]]

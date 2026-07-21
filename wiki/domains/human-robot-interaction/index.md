@@ -20,4 +20,5 @@ title: "Human Robot Interaction"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/doi-10-1007-s00391-026-02616-8|Moflinの高齢者施設フィールド研究]]
+- [[../../papers/arxiv-2607-15156|社会ロボットによるフレイル評価]]
