@@ -210,8 +210,8 @@ def enrich_semantic_scholar(
 def preliminary_priority(candidate: dict[str, Any]) -> tuple[int, int, str]:
     metrics = candidate["metrics"]
     return (
-        citation_count(candidate),
         int(metrics["query_match_count"] or 0),
+        citation_count(candidate),
         candidate.get("publication_date") or "",
     )
 
@@ -354,10 +354,10 @@ def ranking_key(candidate: dict[str, Any]) -> tuple[int, int, int, int, int, str
     metrics = candidate["metrics"]
     return (
         int(candidate["attention_gate"]["passed"]),
+        int(metrics["query_match_count"] or 0),
         citation_count(candidate),
         int(metrics["reddit_mentions_30d"] or 0),
         int(metrics["x_original_posts_rolling_30d"] or 0),
-        int(metrics["query_match_count"] or 0),
         candidate.get("publication_date") or "",
     )
 
@@ -366,14 +366,18 @@ def select_review_queue(
     candidates: list[dict[str, Any]], max_candidates: int, relevance_reserve: int
 ) -> list[dict[str, Any]]:
     ranked = sorted(candidates, key=ranking_key, reverse=True)
-    selected = [candidate for candidate in ranked if candidate["attention_gate"]["passed"]][
-        :max_candidates
+    reserve_count = min(max_candidates, relevance_reserve)
+    attention_slots = max_candidates - reserve_count
+    attention_candidates = [
+        candidate for candidate in ranked if candidate["attention_gate"]["passed"]
     ]
-    remaining_slots = max_candidates - len(selected)
-    reserve_count = min(remaining_slots, relevance_reserve)
+    selected = attention_candidates[:attention_slots]
     reserve = [candidate for candidate in ranked if not candidate["attention_gate"]["passed"]][
         :reserve_count
     ]
+    remaining_slots = max_candidates - len(selected) - len(reserve)
+    if remaining_slots:
+        selected.extend(attention_candidates[attention_slots : attention_slots + remaining_slots])
     for candidate in selected:
         candidate["selected_for_review"] = True
         candidate["selection_reason"] = "attention_gate"

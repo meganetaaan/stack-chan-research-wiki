@@ -105,6 +105,21 @@ class RankingTests(TestCase):
         self.assertEqual(queue[0]["selection_reason"], "attention_gate")
         self.assertEqual(queue[1]["selection_reason"], "relevance_reserve")
 
+    def test_attention_candidates_do_not_consume_relevance_reserve(self) -> None:
+        cited = [self.candidate(f"cited-{index}", citations=1) for index in range(3)]
+        quiet = self.candidate("quiet")
+        quiet["metrics"]["query_match_count"] = 5
+        for candidate in [*cited, quiet]:
+            collect_papers.evaluate_attention(candidate, self.thresholds)
+
+        queue = collect_papers.select_review_queue(
+            [*cited, quiet], max_candidates=3, relevance_reserve=1
+        )
+
+        self.assertEqual(len(queue), 3)
+        self.assertEqual(queue[-1]["key"], "doi:10.0000/quiet")
+        self.assertEqual(queue[-1]["selection_reason"], "relevance_reserve")
+
 
 class ReviewReportTests(TestCase):
     def test_renders_only_review_queue_as_human_readable_markdown(self) -> None:
