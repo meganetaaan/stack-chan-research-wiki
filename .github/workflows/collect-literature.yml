@@ -2,6 +2,12 @@ name: Collect literature candidates
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_pr:
+        description: Create a Draft PR containing the collected candidates
+        required: false
+        default: true
+        type: boolean
   schedule:
     - cron: "20 6 * * 5"
       timezone: "Asia/Tokyo"
@@ -35,6 +41,7 @@ jobs:
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
         run: python scripts/collect_papers.py
       - name: Create pull request
+        if: github.event_name == 'schedule' || inputs.publish_pr
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

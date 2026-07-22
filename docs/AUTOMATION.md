@@ -11,6 +11,8 @@
 - `deploy-pages.yml`: main更新時にWikiを公開
 - `monthly-health-check.yml`: 月次で機械的な問題をIssueへ報告
 
+`collect-literature.yml` を手動実行するときは、`publish_pr=false` を指定すると候補PRを作らずにAPI接続と収集件数を確認できる。
+
 ## 候補の優先順位
 
 収集処理は全候補を `sources/inbox/` に残し、最大10件のレビューキューを生成する。
