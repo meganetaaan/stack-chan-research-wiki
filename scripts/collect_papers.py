@@ -476,6 +476,8 @@ def main() -> None:
     )
     if warnings:
         print(f"Completed with {len(warnings)} enrichment warning(s)")
+        for warning in warnings:
+            print(f"WARNING: {warning}")
 
 
 if __name__ == "__main__":
