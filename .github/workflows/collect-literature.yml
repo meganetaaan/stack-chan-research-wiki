@@ -2,6 +2,12 @@ name: Collect literature candidates
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_pr:
+        description: Create a Draft PR containing the collected candidates
+        required: false
+        default: true
+        type: boolean
   schedule:
     - cron: "20 6 * * 5"
       timezone: "Asia/Tokyo"
@@ -19,16 +25,27 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - name: Verify required configuration
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+        run: |
+          if [ -z "$OPENALEX_API_KEY" ]; then
+            echo "OPENALEX_API_KEY is required for scheduled collection" >&2
+            exit 1
+          fi
       - name: Collect candidates
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
-          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
-        run: python scripts/collect_openalex.py
+          API_CONTACT_EMAIL: ${{ secrets.API_CONTACT_EMAIL }}
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        run: python scripts/collect_papers.py
       - name: Create pull request
+        if: github.event_name == 'schedule' || inputs.publish_pr
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain sources/inbox)" ]; then
             exit 0
           fi
           branch="automation/literature-$(date +%Y-%m-%d)"
@@ -39,7 +56,8 @@ jobs:
           git commit -m "chore: collect literature candidates"
           git push origin "$branch"
           gh pr create \
+            --draft \
             --title "Literature candidates $(date +%Y-%m-%d)" \
-            --body "Automated metadata collection. No wiki claims were changed." \
+            --body "30-day candidate collection with citation and social-attention signals. No wiki claims were changed." \
             --base main \
             --head "$branch"
