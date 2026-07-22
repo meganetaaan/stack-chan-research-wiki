@@ -25,6 +25,7 @@ def work(
         "cited_by_count": citations,
         "primary_location": {},
         "locations": [],
+        "authorships": [{"author": {"display_name": "Sample Author"}}],
     }
 
 
@@ -103,6 +104,55 @@ class RankingTests(TestCase):
         self.assertEqual(queue[0]["key"], "doi:10.0000/cited")
         self.assertEqual(queue[0]["selection_reason"], "attention_gate")
         self.assertEqual(queue[1]["selection_reason"], "relevance_reserve")
+
+    def test_attention_candidates_do_not_consume_relevance_reserve(self) -> None:
+        cited = [self.candidate(f"cited-{index}", citations=1) for index in range(3)]
+        quiet = self.candidate("quiet")
+        quiet["metrics"]["query_match_count"] = 5
+        for candidate in [*cited, quiet]:
+            collect_papers.evaluate_attention(candidate, self.thresholds)
+
+        queue = collect_papers.select_review_queue(
+            [*cited, quiet], max_candidates=3, relevance_reserve=1
+        )
+
+        self.assertEqual(len(queue), 3)
+        self.assertEqual(queue[-1]["key"], "doi:10.0000/quiet")
+        self.assertEqual(queue[-1]["selection_reason"], "relevance_reserve")
+
+
+class ReviewReportTests(TestCase):
+    def test_renders_only_review_queue_as_human_readable_markdown(self) -> None:
+        candidate = collect_papers.new_candidate(
+            work(
+                "https://openalex.org/W1",
+                title="A Small Social Robot",
+                citations=2,
+            ),
+            "hri",
+            "social robot",
+        )
+        candidate["selected_for_review"] = True
+        candidate["selection_reason"] = "attention_gate"
+        collect_papers.evaluate_attention(candidate, RankingTests.thresholds)
+
+        report = collect_papers.render_review_report(
+            collected_at=dt.date(2026, 7, 22),
+            start=dt.date(2026, 6, 23),
+            end=dt.date(2026, 7, 22),
+            candidate_count=365,
+            review_queue=[candidate],
+            warnings=["Reddit unavailable"],
+        )
+
+        self.assertIn(
+            "## 1. [A Small Social Robot](https://doi.org/10.0000/example)",
+            report,
+        )
+        self.assertIn("- 著者：Sample Author", report)
+        self.assertIn("- 全候補：365件", report)
+        self.assertIn("- 外部指標の取得警告：1件", report)
+        self.assertIn("- 選定理由：定量指標を通過", report)
 
 
 class XHistoryTests(TestCase):

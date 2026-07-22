@@ -100,6 +100,11 @@ def fetch_openalex(
 def new_candidate(work: dict[str, Any], theme: str, query: str) -> dict[str, Any]:
     doi = normalize_doi(work.get("doi"))
     arxiv_id = extract_arxiv_id(work)
+    authors = [
+        authorship.get("author", {}).get("display_name")
+        for authorship in work.get("authorships") or []
+        if authorship.get("author", {}).get("display_name")
+    ]
     return {
         "key": candidate_key(work),
         "themes": [theme],
@@ -108,6 +113,7 @@ def new_candidate(work: dict[str, Any], theme: str, query: str) -> dict[str, Any
         "doi": doi,
         "arxiv_id": arxiv_id,
         "title": work.get("display_name") or work.get("title"),
+        "authors": authors,
         "publication_date": work.get("publication_date"),
         "type": work.get("type"),
         "primary_location": work.get("primary_location"),
@@ -204,8 +210,8 @@ def enrich_semantic_scholar(
 def preliminary_priority(candidate: dict[str, Any]) -> tuple[int, int, str]:
     metrics = candidate["metrics"]
     return (
-        citation_count(candidate),
         int(metrics["query_match_count"] or 0),
+        citation_count(candidate),
         candidate.get("publication_date") or "",
     )
 
@@ -348,10 +354,10 @@ def ranking_key(candidate: dict[str, Any]) -> tuple[int, int, int, int, int, str
     metrics = candidate["metrics"]
     return (
         int(candidate["attention_gate"]["passed"]),
+        int(metrics["query_match_count"] or 0),
         citation_count(candidate),
         int(metrics["reddit_mentions_30d"] or 0),
         int(metrics["x_original_posts_rolling_30d"] or 0),
-        int(metrics["query_match_count"] or 0),
         candidate.get("publication_date") or "",
     )
 
@@ -360,14 +366,18 @@ def select_review_queue(
     candidates: list[dict[str, Any]], max_candidates: int, relevance_reserve: int
 ) -> list[dict[str, Any]]:
     ranked = sorted(candidates, key=ranking_key, reverse=True)
-    selected = [candidate for candidate in ranked if candidate["attention_gate"]["passed"]][
-        :max_candidates
+    reserve_count = min(max_candidates, relevance_reserve)
+    attention_slots = max_candidates - reserve_count
+    attention_candidates = [
+        candidate for candidate in ranked if candidate["attention_gate"]["passed"]
     ]
-    remaining_slots = max_candidates - len(selected)
-    reserve_count = min(remaining_slots, relevance_reserve)
+    selected = attention_candidates[:attention_slots]
     reserve = [candidate for candidate in ranked if not candidate["attention_gate"]["passed"]][
         :reserve_count
     ]
+    remaining_slots = max_candidates - len(selected) - len(reserve)
+    if remaining_slots:
+        selected.extend(attention_candidates[attention_slots : attention_slots + remaining_slots])
     for candidate in selected:
         candidate["selected_for_review"] = True
         candidate["selection_reason"] = "attention_gate"
@@ -386,6 +396,124 @@ def review_summary(candidate: dict[str, Any]) -> dict[str, Any]:
         "attention_gate": candidate["attention_gate"],
         "metrics": candidate["metrics"],
     }
+
+
+def candidate_url(candidate: dict[str, Any]) -> str | None:
+    if candidate.get("doi"):
+        return f"https://doi.org/{candidate['doi']}"
+    if candidate.get("arxiv_id"):
+        return f"https://arxiv.org/abs/{candidate['arxiv_id']}"
+    primary_location = candidate.get("primary_location") or {}
+    return primary_location.get("landing_page_url") or candidate.get("id")
+
+
+def metric_value(value: int | None, status: str) -> str:
+    if value is not None:
+        return str(value)
+    status_labels = {
+        "disabled_by_config": "未使用",
+        "disabled_missing_token": "未設定",
+        "unavailable_without_doi": "DOIなし",
+        "unavailable_without_identifier": "識別子なし",
+        "skipped_after_source_error": "取得障害により省略",
+        "error": "取得失敗",
+        "not_checked": "未確認",
+    }
+    return status_labels.get(status, "データなし")
+
+
+def render_review_report(
+    *,
+    collected_at: dt.date,
+    start: dt.date,
+    end: dt.date,
+    candidate_count: int,
+    review_queue: list[dict[str, Any]],
+    warnings: list[str],
+) -> str:
+    lines = [
+        f"# 文献候補レビュー {collected_at.isoformat()}",
+        "",
+        "> 自動収集した候補です。Wiki本文と検証状態は変更していません。",
+        "",
+        "## 収集概要",
+        "",
+        f"- 対象期間：{start.isoformat()}から{end.isoformat()}",
+        f"- 全候補：{candidate_count}件",
+        f"- 優先レビュー候補：{len(review_queue)}件",
+        f"- 外部指標の取得警告：{len(warnings)}件",
+        "",
+        "## レビュー手順",
+        "",
+        "1. タイトルのリンクから一次情報を開く",
+        "2. ｽﾀｯｸﾁｬﾝとの関連性を高、中、低で判断する",
+        "3. 採用する候補だけ書誌情報と内容を確認し、Wikiページを作成する",
+        "",
+        "定量指標は注目度の補助情報であり、研究の妥当性を示すものではありません。",
+    ]
+    selection_labels = {
+        "attention_gate": "定量指標を通過",
+        "relevance_reserve": "関連性確認枠",
+    }
+    for index, candidate in enumerate(review_queue, start=1):
+        metrics = candidate["metrics"]
+        metric_status = candidate["metric_status"]
+        url = candidate_url(candidate)
+        title = candidate.get("title") or "無題"
+        heading = f"## {index}. [{title}]({url})" if url else f"## {index}. {title}"
+        authors = ", ".join(candidate.get("authors") or []) or "取得できず"
+        location = candidate.get("primary_location") or {}
+        venue = (location.get("source") or {}).get("display_name") or "取得できず"
+        identifier = candidate.get("doi") or candidate.get("arxiv_id") or candidate["key"]
+        reasons = ", ".join(candidate["attention_gate"]["reasons"]) or "なし"
+        themes = ", ".join(candidate.get("themes") or [])
+        queries = ", ".join(candidate.get("queries") or [])
+        selection = selection_labels.get(
+            candidate.get("selection_reason"),
+            candidate.get("selection_reason") or "不明",
+        )
+        influential = metric_value(
+            metrics["semantic_scholar_influential_citation_count"],
+            metric_status["semantic_scholar"],
+        )
+        reddit = metric_value(
+            metrics["reddit_mentions_30d"], metric_status["crossref_reddit"]
+        )
+        x_posts = metric_value(
+            metrics["x_original_posts_rolling_30d"], metric_status["x"]
+        )
+        lines.extend(
+            [
+                "",
+                heading,
+                "",
+                f"- 著者：{authors}",
+                f"- 公開日：{candidate.get('publication_date') or '取得できず'}",
+                f"- 種別：{candidate.get('type') or '取得できず'}",
+                f"- 掲載先：{venue}",
+                f"- 識別子：`{identifier}`",
+                f"- 選定理由：{selection}（{reasons}）",
+                "- 指標："
+                f"被引用 {citation_count(candidate)}、"
+                f"影響力の高い引用 {influential}、"
+                f"Reddit {reddit}、"
+                f"X 30日近似 {x_posts}",
+                f"- 検索テーマ：{themes}",
+                f"- 一致した検索語：{queries}",
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "## 機械可読データ",
+            "",
+            "全候補と取得状態は "
+            f"`sources/inbox/literature-{collected_at.isoformat()}.json` "
+            "に保存しています。",
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def main() -> None:
@@ -466,13 +594,25 @@ def main() -> None:
     INBOX.mkdir(parents=True, exist_ok=True)
     output = INBOX / f"literature-{today.isoformat()}.json"
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    report = INBOX / f"literature-{today.isoformat()}.md"
+    report.write_text(
+        render_review_report(
+            collected_at=today,
+            start=start,
+            end=end,
+            candidate_count=len(candidates),
+            review_queue=review_queue,
+            warnings=warnings,
+        ),
+        encoding="utf-8",
+    )
     try:
         display_path = output.relative_to(ROOT)
     except ValueError:
         display_path = output
     print(
         f"Wrote {len(candidates)} candidates and {len(review_queue)} review items "
-        f"to {display_path}"
+        f"to {display_path} and {report.relative_to(ROOT)}"
     )
     if warnings:
         print(f"Completed with {len(warnings)} enrichment warning(s)")
