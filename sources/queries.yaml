@@ -173,6 +173,80 @@ filters:
   max_candidates_per_query: 20
   max_review_candidates: 10
   relevance_reserve: 3
+relevance:
+  min_score: 30
+  anchor_terms:
+  - social robot
+  - companion robot
+  - communication robot
+  - communicative robot
+  - assistive robot
+  - human-robot
+  - human robot
+  - embodied agent
+  - embodied conversational agent
+  - conversational agent
+  - spoken dialogue system
+  - dialogue system
+  - voice assistant
+  - full-duplex
+  - turn-taking
+  - backchannel
+  - joint attention
+  - robot dialogue
+  - robot conversation
+  - robot interaction
+  - kawaii
+  - cuteness
+  - baby schema
+  - oshikatsu
+  - parasocial relationship
+  - open source hardware
+  - open-source hardware
+  - tinyml
+  - synthetic relationship
+  topic_terms:
+  - dialogue
+  - conversation
+  - speech
+  - voice
+  - gesture
+  - gaze
+  - multimodal
+  - embodiment
+  - emotion
+  - empathy
+  - personality
+  - attachment
+  - trust
+  - long-term
+  - longitudinal
+  - everyday life
+  - field study
+  - adoption
+  - privacy
+  - sustainability
+  - maker
+  - fandom
+  - participatory culture
+  trusted_venue_patterns:
+  - human-robot interaction
+  - robot and human interactive communication
+  - ro-man
+  - sigdial
+  - iwsds
+  - conversational user interfaces
+  - intelligent virtual agents
+  weights:
+    title_anchor: 30
+    abstract_anchor: 20
+    additional_anchor: 5
+    title_topic: 5
+    abstract_topic: 2
+    topic_cap: 20
+    trusted_venue: 25
+    source_diversity: 5
+    source_diversity_cap: 10
 enrichment:
   semantic_scholar: true
   crossref_reddit: true

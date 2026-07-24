@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import math
 import os
 import re
 import time
@@ -109,6 +110,19 @@ def fetch_openalex(
 
 def compact_text(value: str | None) -> str:
     return " ".join((value or "").split())
+
+
+def work_abstract(work: dict[str, Any]) -> str:
+    abstract = compact_text(work.get("abstract"))
+    if abstract:
+        return abstract
+    inverted = work.get("abstract_inverted_index") or {}
+    positioned_words = [
+        (position, word)
+        for word, positions in inverted.items()
+        for position in positions
+    ]
+    return " ".join(word for _, word in sorted(positioned_words))
 
 
 def parse_arxiv_feed(content: bytes) -> list[dict[str, Any]]:
@@ -398,6 +412,7 @@ def new_candidate(work: dict[str, Any], theme: str, query: str) -> dict[str, Any
         "doi": doi,
         "arxiv_id": arxiv_id,
         "title": work.get("display_name") or work.get("title"),
+        "abstract": work_abstract(work),
         "authors": authors,
         "publication_date": work.get("publication_date"),
         "type": work.get("type"),
@@ -418,6 +433,13 @@ def new_candidate(work: dict[str, Any], theme: str, query: str) -> dict[str, Any
             "x": "not_checked",
         },
         "attention_gate": {"passed": False, "reasons": []},
+        "relevance": {
+            "passed": False,
+            "score": 0,
+            "reasons": [],
+            "matched_anchor_terms": [],
+            "matched_topic_terms": [],
+        },
         "selected_for_review": False,
         "selection_reason": None,
         "status": "candidate",
@@ -442,6 +464,8 @@ def merge_work(
     source = work.get("_discovery_source", "openalex")
     if source not in candidate["discovery_sources"]:
         candidate["discovery_sources"].append(source)
+    if not candidate.get("abstract"):
+        candidate["abstract"] = work_abstract(work)
     candidate["metrics"]["query_match_count"] = len(candidate["queries"])
 
 
@@ -495,10 +519,10 @@ def enrich_semantic_scholar(
             time.sleep(delay)
 
 
-def preliminary_priority(candidate: dict[str, Any]) -> tuple[int, int, str]:
-    metrics = candidate["metrics"]
+def preliminary_priority(candidate: dict[str, Any]) -> tuple[int, int, int, str]:
     return (
-        int(metrics["query_match_count"] or 0),
+        int(candidate["relevance"]["passed"]),
+        int(candidate["relevance"]["score"]),
         citation_count(candidate),
         candidate.get("publication_date") or "",
     )
@@ -623,6 +647,79 @@ def citation_count(candidate: dict[str, Any]) -> int:
     )
 
 
+def matching_terms(text: str, terms: list[str]) -> list[str]:
+    normalized = text.casefold()
+    return [term for term in terms if term.casefold() in normalized]
+
+
+def evaluate_relevance(candidate: dict[str, Any], config: dict[str, Any]) -> None:
+    title = candidate.get("title") or ""
+    abstract = candidate.get("abstract") or ""
+    location = candidate.get("primary_location") or {}
+    venue = ((location.get("source") or {}).get("display_name") or "").casefold()
+    anchors = config.get("anchor_terms", [])
+    topics = config.get("topic_terms", [])
+    weights = config["weights"]
+
+    title_anchors = matching_terms(title, anchors)
+    abstract_anchors = [
+        term for term in matching_terms(abstract, anchors) if term not in title_anchors
+    ]
+    title_topics = matching_terms(title, topics)
+    abstract_topics = [
+        term for term in matching_terms(abstract, topics) if term not in title_topics
+    ]
+    venue_matches = [
+        pattern
+        for pattern in config.get("trusted_venue_patterns", [])
+        if pattern.casefold() in venue
+    ]
+
+    score = 0
+    reasons = []
+    matched_anchors = title_anchors + abstract_anchors
+    if title_anchors:
+        score += weights["title_anchor"]
+        score += weights["additional_anchor"] * (len(matched_anchors) - 1)
+        reasons.append("title_anchor")
+    elif abstract_anchors:
+        score += weights["abstract_anchor"]
+        score += weights["additional_anchor"] * (len(abstract_anchors) - 1)
+        reasons.append("abstract_anchor")
+
+    topic_score = min(
+        len(title_topics) * weights["title_topic"]
+        + len(abstract_topics) * weights["abstract_topic"],
+        weights["topic_cap"],
+    )
+    if topic_score:
+        score += topic_score
+        reasons.append("topic_terms")
+
+    if venue_matches:
+        score += weights["trusted_venue"]
+        reasons.append("trusted_venue")
+
+    source_bonus = min(
+        max(len(candidate.get("discovery_sources") or []) - 1, 0)
+        * weights["source_diversity"],
+        weights["source_diversity_cap"],
+    )
+    if source_bonus:
+        score += source_bonus
+        reasons.append("multiple_sources")
+
+    has_anchor = bool(matched_anchors or venue_matches)
+    passed = has_anchor and score >= config["min_score"]
+    candidate["relevance"] = {
+        "passed": passed,
+        "score": score,
+        "reasons": reasons,
+        "matched_anchor_terms": matched_anchors,
+        "matched_topic_terms": title_topics + abstract_topics,
+    }
+
+
 def evaluate_attention(candidate: dict[str, Any], thresholds: dict[str, int]) -> None:
     metrics = candidate["metrics"]
     reasons = []
@@ -638,41 +735,64 @@ def evaluate_attention(candidate: dict[str, Any], thresholds: dict[str, int]) ->
     candidate["attention_gate"] = {"passed": bool(reasons), "reasons": reasons}
 
 
-def ranking_key(candidate: dict[str, Any]) -> tuple[int, int, int, int, int, str]:
+def attention_score(candidate: dict[str, Any]) -> int:
+    metrics = candidate["metrics"]
+    citations = citation_count(candidate)
+    influential = int(metrics["semantic_scholar_influential_citation_count"] or 0)
+    reddit = int(metrics["reddit_mentions_30d"] or 0)
+    x_posts = int(metrics["x_original_posts_rolling_30d"] or 0)
+    return (
+        round(math.log1p(citations) * 10)
+        + min(influential * 5, 25)
+        + round(math.log1p(reddit) * 4)
+        + round(math.log1p(x_posts) * 3)
+    )
+
+
+def ranking_key(candidate: dict[str, Any]) -> tuple[int, int, int, str, int]:
     metrics = candidate["metrics"]
     return (
-        int(candidate["attention_gate"]["passed"]),
-        int(metrics["query_match_count"] or 0),
-        citation_count(candidate),
-        int(metrics["reddit_mentions_30d"] or 0),
-        int(metrics["x_original_posts_rolling_30d"] or 0),
+        int(candidate["relevance"]["passed"]),
+        int(candidate["relevance"]["score"]),
+        attention_score(candidate),
         candidate.get("publication_date") or "",
+        int(metrics["query_match_count"] or 0),
     )
 
 
 def select_review_queue(
     candidates: list[dict[str, Any]], max_candidates: int, relevance_reserve: int
 ) -> list[dict[str, Any]]:
-    ranked = sorted(candidates, key=ranking_key, reverse=True)
+    ranked = sorted(
+        [candidate for candidate in candidates if candidate["relevance"]["passed"]],
+        key=ranking_key,
+        reverse=True,
+    )
     reserve_count = min(max_candidates, relevance_reserve)
     attention_slots = max_candidates - reserve_count
     attention_candidates = [
         candidate for candidate in ranked if candidate["attention_gate"]["passed"]
     ]
-    selected = attention_candidates[:attention_slots]
-    reserve = [candidate for candidate in ranked if not candidate["attention_gate"]["passed"]][
-        :reserve_count
+    emerging_candidates = [
+        candidate for candidate in ranked if not candidate["attention_gate"]["passed"]
     ]
+    selected = attention_candidates[:attention_slots]
+    reserve = emerging_candidates[:reserve_count]
     remaining_slots = max_candidates - len(selected) - len(reserve)
     if remaining_slots:
-        selected.extend(attention_candidates[attention_slots : attention_slots + remaining_slots])
+        remaining = [
+            candidate
+            for candidate in ranked
+            if candidate not in selected and candidate not in reserve
+        ]
+        selected.extend(remaining[:remaining_slots])
     for candidate in selected:
         candidate["selected_for_review"] = True
-        candidate["selection_reason"] = "attention_gate"
+        candidate["selection_reason"] = "relevance_and_attention"
     for candidate in reserve:
         candidate["selected_for_review"] = True
-        candidate["selection_reason"] = "relevance_reserve"
-    return selected + reserve
+        candidate["selection_reason"] = "emerging_relevance"
+    return sorted(selected + reserve, key=ranking_key, reverse=True)
 
 
 def review_summary(candidate: dict[str, Any]) -> dict[str, Any]:
@@ -681,7 +801,9 @@ def review_summary(candidate: dict[str, Any]) -> dict[str, Any]:
         "title": candidate["title"],
         "publication_date": candidate["publication_date"],
         "selection_reason": candidate["selection_reason"],
+        "relevance": candidate["relevance"],
         "attention_gate": candidate["attention_gate"],
+        "attention_score": attention_score(candidate),
         "metrics": candidate["metrics"],
     }
 
@@ -740,8 +862,8 @@ def render_review_report(
         "定量指標は注目度の補助情報であり、研究の妥当性を示すものではありません。",
     ]
     selection_labels = {
-        "attention_gate": "定量指標を通過",
-        "relevance_reserve": "関連性確認枠",
+        "relevance_and_attention": "関連性合格・定量指標を通過",
+        "emerging_relevance": "関連性合格・新着発見枠",
     }
     for index, candidate in enumerate(review_queue, start=1):
         metrics = candidate["metrics"]
@@ -754,6 +876,8 @@ def render_review_report(
         venue = (location.get("source") or {}).get("display_name") or "取得できず"
         identifier = candidate.get("doi") or candidate.get("arxiv_id") or candidate["key"]
         reasons = ", ".join(candidate["attention_gate"]["reasons"]) or "なし"
+        relevance = candidate["relevance"]
+        relevance_reasons = ", ".join(relevance["reasons"]) or "なし"
         themes = ", ".join(candidate.get("themes") or [])
         queries = ", ".join(candidate.get("queries") or [])
         discovery_sources = ", ".join(candidate.get("discovery_sources") or [])
@@ -783,11 +907,13 @@ def render_review_report(
                 f"- 識別子：`{identifier}`",
                 f"- 収集元：{discovery_sources}",
                 f"- 選定理由：{selection}（{reasons}）",
+                f"- 関連性：{relevance['score']}点（{relevance_reasons}）",
                 "- 指標："
                 f"被引用 {citation_count(candidate)}、"
                 f"影響力の高い引用 {influential}、"
                 f"Reddit {reddit}、"
-                f"X 30日近似 {x_posts}",
+                f"X 30日近似 {x_posts}、"
+                f"注目度スコア {attention_score(candidate)}",
                 f"- 検索テーマ：{themes}",
                 f"- 一致した検索語：{queries}",
             ]
@@ -809,6 +935,7 @@ def render_review_report(
 def main() -> None:
     config = yaml.safe_load(QUERY_FILE.read_text(encoding="utf-8"))
     filters = config["filters"]
+    relevance_config = config["relevance"]
     enrichment = config["enrichment"]
     thresholds = config["attention_thresholds"]
     today = dt.date.today()
@@ -902,12 +1029,16 @@ def main() -> None:
                     )
 
     candidates = list(candidates_by_key.values())
+    for candidate in candidates:
+        evaluate_relevance(candidate, relevance_config)
     if enrichment["semantic_scholar"]:
         enrich_semantic_scholar(candidates, warnings, enrichment["request_delay_seconds"])
 
-    enrichment_candidates = sorted(candidates, key=preliminary_priority, reverse=True)[
-        : enrichment["max_candidates"]
-    ]
+    enrichment_candidates = sorted(
+        [candidate for candidate in candidates if candidate["relevance"]["passed"]],
+        key=preliminary_priority,
+        reverse=True,
+    )[: enrichment["max_candidates"]]
     if enrichment["crossref_reddit"]:
         enrich_reddit(
             enrichment_candidates,
@@ -952,6 +1083,7 @@ def main() -> None:
             "x": "queried" if x_queried else "disabled_or_unavailable",
         },
         "attention_thresholds": thresholds,
+        "relevance_threshold": relevance_config["min_score"],
         "warnings": warnings,
         "candidate_count": len(candidates),
         "review_queue": [review_summary(candidate) for candidate in review_queue],
