@@ -2,7 +2,7 @@
 
 ## 候補の発見
 
-1. 定期検索が過去30日間の候補を `sources/inbox/` に追加する
+1. OpenAlex、arXiv、ACL Anthologyの定期検索が過去30日間の候補を `sources/inbox/` に追加する
 2. DOI、arXiv ID、CRID、タイトルで重複確認する
 3. 被引用数、Reddit言及数、X原投稿数を確認する
 4. Draft PR本文に表示された最大10件のレビューキューから一次情報を確認する

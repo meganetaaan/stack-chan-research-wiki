@@ -63,6 +63,68 @@ class CandidateTests(TestCase):
         self.assertEqual(collect_papers.candidate_key(item), "arxiv:2607.15156")
 
 
+class SourceParsingTests(TestCase):
+    def test_parses_arxiv_atom_metadata(self) -> None:
+        feed = b"""<?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom"
+              xmlns:arxiv="http://arxiv.org/schemas/atom">
+          <entry>
+            <id>https://arxiv.org/abs/2607.12345v2</id>
+            <updated>2026-07-22T10:00:00Z</updated>
+            <published>2026-07-20T10:00:00Z</published>
+            <title>Embodied Dialogue</title>
+            <summary>A social robot dialogue study.</summary>
+            <author><name>Example Author</name></author>
+            <category term="cs.RO" />
+            <arxiv:doi>10.0000/arxiv-example</arxiv:doi>
+          </entry>
+        </feed>"""
+
+        works = collect_papers.parse_arxiv_feed(feed)
+
+        self.assertEqual(len(works), 1)
+        self.assertEqual(works[0]["ids"]["arxiv"], "https://arxiv.org/abs/2607.12345")
+        self.assertEqual(works[0]["publication_date"], "2026-07-20")
+        self.assertEqual(works[0]["updated_date"], "2026-07-22")
+        self.assertEqual(works[0]["authorships"][0]["author"]["display_name"], "Example Author")
+
+    def test_filters_acl_anthology_by_ingest_date_and_focus_terms(self) -> None:
+        anthology = b"""<?xml version="1.0" encoding="UTF-8"?>
+        <collection id="2026.sigdial">
+          <volume id="1" ingest-date="2026-07-21">
+            <meta>
+              <booktitle>SIGDIAL 2026</booktitle>
+              <month>August</month><year>2026</year>
+            </meta>
+            <paper id="1">
+              <title>Turn-Taking for a Social Robot</title>
+              <author><first>Ada</first><last>Lovelace</last></author>
+              <abstract>We study backchannel timing.</abstract>
+              <url>2026.sigdial-1.1</url>
+            </paper>
+            <paper id="2">
+              <title>Discourse Parsing</title>
+              <abstract>No embodied interaction.</abstract>
+              <url>2026.sigdial-1.2</url>
+            </paper>
+          </volume>
+        </collection>"""
+
+        results = collect_papers.parse_acl_anthology(
+            anthology,
+            {"id": "sigdial", "name": "SIGDIAL", "theme": "dialogue_language"},
+            dt.date(2026, 6, 25),
+            dt.date(2026, 7, 24),
+            ["social robot", "turn-taking", "backchannel"],
+        )
+
+        self.assertEqual(len(results), 1)
+        candidate, matches = results[0]
+        self.assertEqual(candidate["id"], "https://aclanthology.org/2026.sigdial-1.1/")
+        self.assertEqual(candidate["authorships"][0]["author"]["display_name"], "Ada Lovelace")
+        self.assertEqual(matches, ["social robot", "turn-taking", "backchannel"])
+
+
 class RankingTests(TestCase):
     thresholds = {
         "min_citations": 1,
@@ -150,6 +212,7 @@ class ReviewReportTests(TestCase):
             report,
         )
         self.assertIn("- 著者：Sample Author", report)
+        self.assertIn("- 収集元：openalex", report)
         self.assertIn("- 全候補：365件", report)
         self.assertIn("- 外部指標の取得警告：1件", report)
         self.assertIn("- 選定理由：定量指標を通過", report)
