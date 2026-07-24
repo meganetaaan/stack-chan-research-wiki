@@ -26,6 +26,9 @@ SEMANTIC_SCHOLAR_API_URL = os.environ.get(
 EVENT_DATA_API_URL = os.environ.get(
     "EVENT_DATA_API_URL", "https://api.eventdata.crossref.org/v1/events"
 )
+CROSSREF_WORKS_API_URL = os.environ.get(
+    "CROSSREF_WORKS_API_URL", "https://api.crossref.org/works"
+)
 X_COUNTS_API_URL = os.environ.get(
     "X_COUNTS_API_URL", "https://api.x.com/2/tweets/counts/recent"
 )
@@ -286,6 +289,96 @@ def fetch_acl_anthology(
         return []
     response.raise_for_status()
     return parse_acl_anthology(response.content, venue, start, end, focus_terms)
+
+
+def crossref_date(item: dict[str, Any]) -> str | None:
+    for field in ("published-online", "published-print", "published", "created"):
+        parts = (item.get(field) or {}).get("date-parts") or []
+        if not parts or not parts[0]:
+            continue
+        values = list(parts[0]) + [1, 1]
+        try:
+            return dt.date(int(values[0]), int(values[1]), int(values[2])).isoformat()
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def crossref_item_to_work(
+    item: dict[str, Any], venue: dict[str, Any]
+) -> dict[str, Any]:
+    doi = normalize_doi(item.get("DOI"))
+    title = compact_text((item.get("title") or [""])[0])
+    authors = []
+    for author in item.get("author") or []:
+        name = " ".join(
+            value
+            for value in (author.get("given"), author.get("family"))
+            if value
+        )
+        if name:
+            authors.append(name)
+    container = compact_text((item.get("container-title") or [venue["name"]])[0])
+    url = f"https://doi.org/{doi}" if doi else item.get("URL")
+    return {
+        "id": url,
+        "doi": doi,
+        "display_name": title,
+        "abstract": compact_text(re.sub(r"<[^>]+>", " ", item.get("abstract") or "")),
+        "publication_date": crossref_date(item),
+        "type": item.get("type") or "proceedings-article",
+        "cited_by_count": item.get("is-referenced-by-count") or 0,
+        "primary_location": {
+            "landing_page_url": url,
+            "source": {"display_name": container},
+        },
+        "locations": [{"landing_page_url": url}] if url else [],
+        "authorships": [
+            {"author": {"display_name": author}} for author in authors
+        ],
+        "_discovery_source": "crossref_conference",
+    }
+
+
+def crossref_venue_matches(item: dict[str, Any], venue: dict[str, Any]) -> bool:
+    containers = " ".join(item.get("container-title") or []).casefold()
+    return any(
+        pattern.casefold() in containers
+        for pattern in venue.get("container_patterns", [])
+    )
+
+
+def fetch_crossref_conference(
+    venue: dict[str, Any],
+    start: dt.date,
+    end: dt.date,
+    focus_terms: list[str],
+    max_results: int,
+) -> list[tuple[dict[str, Any], list[str]]]:
+    params = {
+        "query.container-title": venue["query"],
+        "filter": (
+            f"from-update-date:{start.isoformat()},"
+            f"until-update-date:{end.isoformat()},type:proceedings-article"
+        ),
+        "rows": max_results,
+    }
+    if mailto := os.environ.get("API_CONTACT_EMAIL"):
+        params["mailto"] = mailto
+    response = requests.get(CROSSREF_WORKS_API_URL, params=params, timeout=30)
+    response.raise_for_status()
+    results = []
+    for item in response.json().get("message", {}).get("items", []):
+        if not crossref_venue_matches(item, venue):
+            continue
+        work = crossref_item_to_work(item, venue)
+        haystack = f"{work['display_name']} {work['abstract']}".casefold()
+        matches = [term for term in focus_terms if term.casefold() in haystack]
+        if venue.get("accept_all"):
+            matches = matches or ["venue_scope"]
+        if matches:
+            results.append((work, matches))
+    return results
 
 
 def new_candidate(work: dict[str, Any], theme: str, query: str) -> dict[str, Any]:
@@ -783,6 +876,31 @@ def main() -> None:
                             f"{venue['name']}:{match}",
                         )
 
+    conference_config = config.get("crossref_conferences", {})
+    if conference_config.get("enabled"):
+        for venue in conference_config.get("venues", []):
+            try:
+                works_with_matches = fetch_crossref_conference(
+                    venue,
+                    start,
+                    end,
+                    conference_config.get("focus_terms", []),
+                    conference_config["max_results_per_venue"],
+                )
+            except (requests.RequestException, ValueError) as error:
+                warnings.append(
+                    f"Crossref conference collection failed for {venue['name']}: {error}"
+                )
+                continue
+            for work, matches in works_with_matches:
+                for match in matches:
+                    merge_work(
+                        candidates_by_key,
+                        work,
+                        venue["theme"],
+                        f"{venue['name']}:{match}",
+                    )
+
     candidates = list(candidates_by_key.values())
     if enrichment["semantic_scholar"]:
         enrich_semantic_scholar(candidates, warnings, enrichment["request_delay_seconds"])
@@ -826,6 +944,9 @@ def main() -> None:
             "openalex": "required",
             "arxiv": "enabled" if arxiv_config.get("enabled") else "disabled",
             "acl_anthology": "enabled" if acl_config.get("enabled") else "disabled",
+            "crossref_conferences": (
+                "enabled" if conference_config.get("enabled") else "disabled"
+            ),
             "semantic_scholar": "enabled" if enrichment["semantic_scholar"] else "disabled",
             "crossref_reddit": "enabled" if enrichment["crossref_reddit"] else "disabled",
             "x": "queried" if x_queried else "disabled_or_unavailable",

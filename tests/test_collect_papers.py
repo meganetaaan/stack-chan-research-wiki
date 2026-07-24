@@ -124,6 +124,37 @@ class SourceParsingTests(TestCase):
         self.assertEqual(candidate["authorships"][0]["author"]["display_name"], "Ada Lovelace")
         self.assertEqual(matches, ["social robot", "turn-taking", "backchannel"])
 
+    def test_normalizes_crossref_conference_metadata(self) -> None:
+        venue = {
+            "name": "ACM/IEEE HRI",
+            "container_patterns": ["human-robot interaction"],
+        }
+        item = {
+            "DOI": "10.0000/HRI-EXAMPLE",
+            "title": ["Long-Term Interaction with a Social Robot"],
+            "author": [{"given": "Ada", "family": "Lovelace"}],
+            "container-title": [
+                "Proceedings of the ACM/IEEE International Conference on Human-Robot Interaction"
+            ],
+            "published-online": {"date-parts": [[2026, 7, 20]]},
+            "type": "proceedings-article",
+            "is-referenced-by-count": 2,
+        }
+
+        work = collect_papers.crossref_item_to_work(item, venue)
+
+        self.assertTrue(collect_papers.crossref_venue_matches(item, venue))
+        self.assertEqual(work["doi"], "10.0000/hri-example")
+        self.assertEqual(work["publication_date"], "2026-07-20")
+        self.assertEqual(work["authorships"][0]["author"]["display_name"], "Ada Lovelace")
+        self.assertEqual(work["_discovery_source"], "crossref_conference")
+
+    def test_crossref_venue_match_rejects_similar_container(self) -> None:
+        item = {"container-title": ["International Conference on Robotics"]}
+        venue = {"container_patterns": ["human-robot interaction"]}
+
+        self.assertFalse(collect_papers.crossref_venue_matches(item, venue))
+
 
 class RankingTests(TestCase):
     thresholds = {

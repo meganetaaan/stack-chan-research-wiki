@@ -93,6 +93,78 @@ acl_anthology:
   - full-duplex
   - child
   - older adult
+crossref_conferences:
+  enabled: true
+  max_results_per_venue: 100
+  venues:
+  - id: hri
+    name: ACM/IEEE HRI
+    query: ACM IEEE International Conference on Human-Robot Interaction
+    container_patterns:
+    - human-robot interaction
+    - human robot interaction
+    theme: human_robot_interaction
+    accept_all: true
+  - id: ro-man
+    name: IEEE RO-MAN
+    query: IEEE International Conference on Robot and Human Interactive Communication
+    container_patterns:
+    - robot and human interactive communication
+    - ro-man
+    theme: human_robot_interaction
+    accept_all: true
+  - id: iva
+    name: ACM IVA
+    query: ACM International Conference on Intelligent Virtual Agents
+    container_patterns:
+    - intelligent virtual agents
+    theme: affect_relationships
+  - id: cui
+    name: ACM CUI
+    query: ACM International Conference on Conversational User Interfaces
+    container_patterns:
+    - conversational user interfaces
+    theme: dialogue_language
+  - id: icmi
+    name: ACM ICMI
+    query: ACM International Conference on Multimodal Interaction
+    container_patterns:
+    - multimodal interaction
+    theme: multimodal_interaction
+  - id: interspeech
+    name: INTERSPEECH
+    query: INTERSPEECH
+    container_patterns:
+    - interspeech
+    theme: dialogue_language
+  - id: semdial
+    name: SemDial
+    query: Semantics and Pragmatics of Dialogue
+    container_patterns:
+    - semantics and pragmatics of dialogue
+    theme: dialogue_language
+  focus_terms:
+  - social robot
+  - human-robot
+  - human robot
+  - embodied agent
+  - virtual agent
+  - conversational agent
+  - spoken dialogue
+  - conversational interface
+  - voice assistant
+  - turn-taking
+  - backchannel
+  - multimodal interaction
+  - social interaction
+  - paralinguistic
+  - personality
+  - emotion
+  - empathy
+  - attachment
+  - long-term interaction
+  - child
+  - older adult
 filters:
   languages:
   - en
