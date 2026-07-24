@@ -49,6 +49,122 @@ themes:
   - social robot privacy ethics
   - robot service shutdown right to repair
   - sustainable companion robot
+arxiv:
+  enabled: true
+  categories:
+  - cs.CL
+  - cs.HC
+  - cs.RO
+  - cs.AI
+  max_results_per_query: 20
+  request_delay_seconds: 3
+  queries:
+  - theme: dialogue_language
+    query: '(all:"social robot" OR all:"human robot interaction") AND (all:dialogue OR all:conversation)'
+  - theme: dialogue_language
+    query: '(all:"spoken dialogue system" OR all:"full duplex dialogue") AND (all:"turn taking" OR all:backchannel OR all:repair OR all:grounding)'
+  - theme: multimodal_interaction
+    query: '(all:"embodied agent" OR all:"conversational agent") AND (all:speech OR all:voice OR all:dialogue) AND (all:multimodal OR all:gesture OR all:gaze)'
+  - theme: affect_relationships
+    query: '(all:"social robot" OR all:"embodied conversational agent") AND (all:personality OR all:emotion OR all:attachment OR all:memory)'
+acl_anthology:
+  enabled: true
+  venues:
+  - id: sigdial
+    name: SIGDIAL
+    theme: dialogue_language
+  - id: iwsds
+    name: IWSDS
+    theme: dialogue_language
+  focus_terms:
+  - social robot
+  - human-robot
+  - embodied agent
+  - conversational agent
+  - spoken dialogue
+  - voice-interactive
+  - turn-taking
+  - backchannel
+  - multimodal
+  - paralinguistic
+  - personality
+  - emotion
+  - long-term memory
+  - full-duplex
+  - child
+  - older adult
+crossref_conferences:
+  enabled: true
+  max_results_per_venue: 100
+  venues:
+  - id: hri
+    name: ACM/IEEE HRI
+    query: ACM IEEE International Conference on Human-Robot Interaction
+    container_patterns:
+    - human-robot interaction
+    - human robot interaction
+    theme: human_robot_interaction
+    accept_all: true
+  - id: ro-man
+    name: IEEE RO-MAN
+    query: IEEE International Conference on Robot and Human Interactive Communication
+    container_patterns:
+    - robot and human interactive communication
+    - ro-man
+    theme: human_robot_interaction
+    accept_all: true
+  - id: iva
+    name: ACM IVA
+    query: ACM International Conference on Intelligent Virtual Agents
+    container_patterns:
+    - intelligent virtual agents
+    theme: affect_relationships
+  - id: cui
+    name: ACM CUI
+    query: ACM International Conference on Conversational User Interfaces
+    container_patterns:
+    - conversational user interfaces
+    theme: dialogue_language
+  - id: icmi
+    name: ACM ICMI
+    query: ACM International Conference on Multimodal Interaction
+    container_patterns:
+    - multimodal interaction
+    theme: multimodal_interaction
+  - id: interspeech
+    name: INTERSPEECH
+    query: INTERSPEECH
+    container_patterns:
+    - interspeech
+    theme: dialogue_language
+  - id: semdial
+    name: SemDial
+    query: Semantics and Pragmatics of Dialogue
+    container_patterns:
+    - semantics and pragmatics of dialogue
+    theme: dialogue_language
+  focus_terms:
+  - social robot
+  - human-robot
+  - human robot
+  - embodied agent
+  - virtual agent
+  - conversational agent
+  - spoken dialogue
+  - conversational interface
+  - voice assistant
+  - turn-taking
+  - backchannel
+  - multimodal interaction
+  - social interaction
+  - paralinguistic
+  - personality
+  - emotion
+  - empathy
+  - attachment
+  - long-term interaction
+  - child
+  - older adult
 filters:
   languages:
   - en
