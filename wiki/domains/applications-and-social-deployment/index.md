@@ -21,4 +21,5 @@ title: "Applications And Social Deployment"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/interaction-failures-social-robot|We All Make Mistakes]]
+- [[../../papers/robot-voice-older-adults-us-japan|Finding its Voice]]

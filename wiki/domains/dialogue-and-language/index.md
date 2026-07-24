@@ -25,4 +25,7 @@ title: "Dialogue And Language"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/adaptive-emotion-management-human-robot-dialogue|Adaptive Emotion Management]]
+- [[../../papers/personakit-full-duplex-dialogue|PersonaKit]]
+- [[../../papers/sensor-augmented-vap-turn-taking|Sensor-Augmented VAP]]
+- [[../../papers/turnnat-turn-taking-naturalness|TurnNat]]

@@ -32,4 +32,5 @@ verification_status: candidate
 
 ## 主要文献
 
-未登録。
+- [[../papers/interaction-failures-social-robot|We All Make Mistakes]]
+- [[../papers/robot-user-questions-dataset|What Questions Should Robots Be Able to Answer?]]

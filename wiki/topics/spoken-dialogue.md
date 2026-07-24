@@ -32,4 +32,6 @@ verification_status: candidate
 
 ## 主要文献
 
-未登録。
+- [[../papers/adaptive-emotion-management-human-robot-dialogue|Adaptive Emotion Management]]
+- [[../papers/personakit-full-duplex-dialogue|PersonaKit]]
+- [[../papers/turnnat-turn-taking-naturalness|TurnNat]]

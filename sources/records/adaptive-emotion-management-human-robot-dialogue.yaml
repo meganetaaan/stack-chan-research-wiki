@@ -1,0 +1,19 @@
+id: "acl:2026.sigdial-1.41"
+title: "Adaptive Emotion Management in Human-robot Dialogue using Online Group Relative Policy Optimization"
+authors:
+  - Anna Manaseryan
+  - Casey Kennington
+year: 2026
+identifiers:
+  doi: null
+  arxiv: null
+  crid: null
+  openalex: null
+urls:
+  publisher: "https://aclanthology.org/2026.sigdial-1.41/"
+  open_access: "https://aclanthology.org/2026.sigdial-1.41.pdf"
+publication_status: "peer-reviewed-conference-paper"
+verification_status: fulltext_checked
+retrieved_at: 2026-07-24
+notes:
+  - "SIGDIAL 2026 proceedings were available online before the conference dates."

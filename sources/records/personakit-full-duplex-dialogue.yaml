@@ -1,0 +1,19 @@
+id: "acl:2026.sigdial-1.42"
+title: "PersonaKit (PK): A Plug-and-Play Platform for User Testing Diverse Roles in Full-Duplex Dialogue"
+authors:
+  - Hyunbae Jeon
+  - Jinho D. Choi
+year: 2026
+identifiers:
+  doi: null
+  arxiv: "2605.06007"
+  crid: null
+  openalex: null
+urls:
+  publisher: "https://aclanthology.org/2026.sigdial-1.42/"
+  open_access: "https://arxiv.org/abs/2605.06007"
+publication_status: "peer-reviewed-conference-paper"
+verification_status: fulltext_checked
+retrieved_at: 2026-07-24
+notes:
+  - "The arXiv version is licensed CC BY 4.0 and links the source repository."

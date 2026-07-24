@@ -1,0 +1,24 @@
+id: "acl:2026.sigdial-1.12"
+title: "Sensor-Augmented Voice Activity Projection for Enhancing Turn-Taking Prediction"
+authors:
+  - Satoki Hamanaka
+  - Yasue Kishino
+  - Yuiko Tsunomori
+  - Shin Mizutani
+  - Yuya Chiba
+  - Tadashi Okoshi
+  - Jin Nakazawa
+year: 2026
+identifiers:
+  doi: null
+  arxiv: null
+  crid: null
+  openalex: null
+urls:
+  publisher: "https://aclanthology.org/2026.sigdial-1.12/"
+  open_access: "https://aclanthology.org/2026.sigdial-1.12.pdf"
+publication_status: "peer-reviewed-conference-paper"
+verification_status: fulltext_checked
+retrieved_at: 2026-07-24
+notes:
+  - "The study uses 12 Japanese dyadic dialogues collected from nine university students."

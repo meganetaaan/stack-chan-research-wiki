@@ -22,4 +22,5 @@ title: "Multimodal Interaction"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/sensor-augmented-vap-turn-taking|Sensor-Augmented VAP]]
+- [[../../papers/talking-surveys-embodied-agents|Talking surveys]]

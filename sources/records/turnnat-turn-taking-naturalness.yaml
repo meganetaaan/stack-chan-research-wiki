@@ -1,0 +1,22 @@
+id: "arxiv:2607.01345"
+title: "TurnNat: Automatic Evaluation of Turn-Taking Naturalness in Dyadic Spoken Dialogue"
+authors:
+  - Hao Zhang
+  - Thomas Thebaud
+  - Georgi Tinchev
+  - Venkatesh Ravichandran
+  - Laureano Moro-Velázquez
+year: 2026
+identifiers:
+  doi: null
+  arxiv: "2607.01345"
+  crid: null
+  openalex: null
+urls:
+  publisher: null
+  open_access: "https://arxiv.org/abs/2607.01345"
+publication_status: "preprint"
+verification_status: fulltext_checked
+retrieved_at: 2026-07-24
+notes:
+  - "Version 2, revised 2026-07-05, was checked."
