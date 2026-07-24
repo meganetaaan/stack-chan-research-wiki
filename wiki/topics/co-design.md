@@ -4,7 +4,10 @@ id: co-design
 title: "Co Design"
 aliases: []
 domains: []
-related_topics: []
+related_topics:
+  - healthcare
+  - older-adults
+  - field-study
 verification_status: candidate
 ---
 
@@ -28,8 +31,8 @@ verification_status: candidate
 
 ## ｽﾀｯｸﾁｬﾝへの示唆
 
-未整理。
+専門職と課題手順を設計し、技術的に可能な動作だけでなく現場の安全条件をシステム要件へ反映する。
 
 ## 主要文献
 
-未登録。
+- [[../papers/arxiv-2607-15156|社会ロボットによるフレイル評価]]

@@ -4,7 +4,9 @@ id: reproducibility
 title: "Reproducibility"
 aliases: []
 domains: []
-related_topics: []
+related_topics:
+  - field-study
+  - healthcare
 verification_status: candidate
 ---
 
@@ -24,7 +26,7 @@ verification_status: candidate
 
 ## 結果が分かれている点
 
-未整理。
+フレイル評価プレプリントは指標間の不一致を報告しているが、今回の確認ではコードとデータの公開先を確認できなかった。
 
 ## ｽﾀｯｸﾁｬﾝへの示唆
 
@@ -32,4 +34,4 @@ verification_status: candidate
 
 ## 主要文献
 
-未登録。
+- [[../papers/arxiv-2607-15156|社会ロボットによるフレイル評価]]

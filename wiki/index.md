@@ -19,6 +19,12 @@ title: "Stack-chan Research Wiki"
 - [未解決問題](open-questions.md)
 - [更新履歴](log.md)
 
+## 最近追加した知見
+
+- [Moflinの高齢者施設フィールド研究](papers/doi-10-1007-s00391-026-02616-8.md)
+- [社会ロボットによるフレイル・転倒リスク評価](papers/arxiv-2607-15156.md)
+- [高齢者ケアにおける導入と評価の整理](synthesis/older-adult-deployment-and-assessment.md)
+
 ## ｽﾀｯｸﾁｬﾝ固有の観点
 
 - 小型卓上ロボット
