@@ -21,4 +21,8 @@ title: "Evaluation And Research Methods"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/personakit-full-duplex-dialogue|PersonaKit]]
+- [[../../papers/talking-surveys-embodied-agents|Talking surveys]]
+- [[../../papers/interaction-failures-social-robot|We All Make Mistakes]]
+- [[../../papers/turnnat-turn-taking-naturalness|TurnNat]]
+- [[../../papers/robot-user-questions-dataset|What Questions Should Robots Be Able to Answer?]]

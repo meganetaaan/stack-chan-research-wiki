@@ -29,3 +29,11 @@ title: "Stack-chan Research Wiki"
 - OSSコミュニティによる共同保守
 - キャラクターへの愛着、推し活、イベント、儀礼的実践
 - サービス終了に依存しない持続可能なコンパニオンロボット
+
+## 最近追加した文献群
+
+- [[papers/personakit-full-duplex-dialogue|全二重対話と人格別の割込み方針]]
+- [[papers/turnnat-turn-taking-naturalness|ターンテイキング自然さの自動評価]]
+- [[papers/interaction-failures-social-robot|社会ロボットの失敗と修復]]
+- [[papers/synthetic-relationships-loneliness|合成的関係の便益とリスク]]
+- [[papers/robot-voice-older-adults-us-japan|高齢者向けロボット音声の文化差]]

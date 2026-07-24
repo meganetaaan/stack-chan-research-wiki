@@ -20,16 +20,18 @@ verification_status: candidate
 
 ## 比較的一貫した知見
 
-未整理。
+- 音声活動だけでなく、頭部運動や発話文脈も交替予測の手がかりになり得る。
 
 ## 結果が分かれている点
 
-未整理。
+- 人格に適した割込み方針は一様ではなく、役割やエージェンシーによって譲歩・保持の選好が変わる可能性がある。
 
 ## ｽﾀｯｸﾁｬﾝへの示唆
 
-未整理。
+- 固定無音閾値、VAP、人格別割込み方針をログと人手評定の双方で比較する。
 
 ## 主要文献
 
-未登録。
+- [[../papers/personakit-full-duplex-dialogue|PersonaKit]]
+- [[../papers/sensor-augmented-vap-turn-taking|Sensor-Augmented VAP]]
+- [[../papers/turnnat-turn-taking-naturalness|TurnNat]]

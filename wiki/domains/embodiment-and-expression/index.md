@@ -22,4 +22,6 @@ title: "Embodiment And Expression"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/active-listening-mirroring-hri|Active Listening and Mirroring]]
+- [[../../papers/talking-surveys-embodied-agents|Talking surveys]]
+- [[../../papers/robot-voice-older-adults-us-japan|Finding its Voice]]

@@ -32,4 +32,5 @@ verification_status: candidate
 
 ## 主要文献
 
-未登録。
+- [[../papers/sensor-augmented-vap-turn-taking|Sensor-Augmented VAP]]
+- [[../papers/turnnat-turn-taking-naturalness|TurnNat]]

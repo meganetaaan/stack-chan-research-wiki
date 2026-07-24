@@ -1,0 +1,21 @@
+id: "doi:10.1145/3832777"
+title: "What Questions Should Robots Be Able to Answer? A Dataset of User Questions for Explainable Robotics"
+authors:
+  - Lennart Wachowiak
+  - Andrew Coles
+  - Gerard Canal
+  - Oya Çeliktutan
+year: 2026
+identifiers:
+  doi: "10.1145/3832777"
+  arxiv: "2510.16435"
+  crid: null
+  openalex: null
+urls:
+  publisher: "https://doi.org/10.1145/3832777"
+  open_access: "https://arxiv.org/abs/2510.16435"
+publication_status: "peer-reviewed-journal-article"
+verification_status: fulltext_checked
+retrieved_at: 2026-07-24
+notes:
+  - "The associated dataset repository is https://github.com/lwachowiak/xai-questions-dataset."

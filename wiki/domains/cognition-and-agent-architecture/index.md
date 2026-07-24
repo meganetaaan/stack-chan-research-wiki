@@ -22,4 +22,5 @@ title: "Cognition And Agent Architecture"
 
 ## 主要文献
 
-未登録。
+- [[../../papers/personakit-full-duplex-dialogue|PersonaKit]]
+- [[../../papers/robot-user-questions-dataset|What Questions Should Robots Be Able to Answer?]]

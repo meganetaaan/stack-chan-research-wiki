@@ -32,4 +32,4 @@ verification_status: candidate
 
 ## 主要文献
 
-未登録。
+- [[../papers/synthetic-relationships-loneliness|Relationships in the age of AI]]
