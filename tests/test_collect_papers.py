@@ -15,11 +15,13 @@ def work(
     title: str = "Example",
     doi: str | None = "https://doi.org/10.0000/example",
     citations: int = 0,
+    abstract: str = "",
 ) -> dict:
     return {
         "id": identifier,
         "doi": doi,
         "display_name": title,
+        "abstract": abstract,
         "publication_date": "2026-07-20",
         "type": "article",
         "cited_by_count": citations,
@@ -61,6 +63,16 @@ class CandidateTests(TestCase):
 
         self.assertEqual(collect_papers.extract_arxiv_id(item), "2607.15156")
         self.assertEqual(collect_papers.candidate_key(item), "arxiv:2607.15156")
+
+    def test_reconstructs_openalex_abstract(self) -> None:
+        item = work("https://openalex.org/W1")
+        item["abstract_inverted_index"] = {
+            "robot": [2],
+            "A": [0],
+            "social": [1],
+        }
+
+        self.assertEqual(collect_papers.work_abstract(item), "A social robot")
 
 
 class SourceParsingTests(TestCase):
@@ -162,13 +174,39 @@ class RankingTests(TestCase):
         "min_reddit_mentions": 1,
         "min_x_original_posts": 3,
     }
+    relevance = {
+        "min_score": 30,
+        "anchor_terms": ["social robot", "human-robot", "spoken dialogue system"],
+        "topic_terms": ["dialogue", "interaction", "trust"],
+        "trusted_venue_patterns": ["human-robot interaction", "sigdial"],
+        "weights": {
+            "title_anchor": 30,
+            "abstract_anchor": 20,
+            "additional_anchor": 5,
+            "title_topic": 5,
+            "abstract_topic": 2,
+            "topic_cap": 20,
+            "trusted_venue": 25,
+            "source_diversity": 5,
+            "source_diversity_cap": 10,
+        },
+    }
 
-    def candidate(self, identifier: str, citations: int = 0) -> dict:
-        return collect_papers.new_candidate(
-            work(identifier, title=identifier, doi=f"10.0000/{identifier}", citations=citations),
+    def candidate(
+        self, identifier: str, citations: int = 0, title: str | None = None
+    ) -> dict:
+        candidate = collect_papers.new_candidate(
+            work(
+                identifier,
+                title=title or f"Social robot {identifier}",
+                doi=f"10.0000/{identifier}",
+                citations=citations,
+            ),
             "hri",
             "social robot",
         )
+        collect_papers.evaluate_relevance(candidate, self.relevance)
+        return candidate
 
     def test_attention_gate_records_each_quantitative_reason(self) -> None:
         candidate = self.candidate("signal", citations=1)
@@ -183,7 +221,7 @@ class RankingTests(TestCase):
             ["citations>=1", "reddit_mentions>=1", "x_original_posts>=3"],
         )
 
-    def test_queue_prioritizes_attention_and_keeps_relevance_reserve(self) -> None:
+    def test_queue_keeps_relevant_emerging_reserve(self) -> None:
         cited = self.candidate("cited", citations=1)
         quiet = self.candidate("quiet")
         other_quiet = self.candidate("other-quiet")
@@ -195,8 +233,8 @@ class RankingTests(TestCase):
         )
 
         self.assertEqual(queue[0]["key"], "doi:10.0000/cited")
-        self.assertEqual(queue[0]["selection_reason"], "attention_gate")
-        self.assertEqual(queue[1]["selection_reason"], "relevance_reserve")
+        self.assertEqual(queue[0]["selection_reason"], "relevance_and_attention")
+        self.assertEqual(queue[1]["selection_reason"], "emerging_relevance")
 
     def test_attention_candidates_do_not_consume_relevance_reserve(self) -> None:
         cited = [self.candidate(f"cited-{index}", citations=1) for index in range(3)]
@@ -211,7 +249,27 @@ class RankingTests(TestCase):
 
         self.assertEqual(len(queue), 3)
         self.assertEqual(queue[-1]["key"], "doi:10.0000/quiet")
-        self.assertEqual(queue[-1]["selection_reason"], "relevance_reserve")
+        self.assertEqual(queue[-1]["selection_reason"], "emerging_relevance")
+
+    def test_irrelevant_cited_paper_does_not_outrank_relevant_new_paper(self) -> None:
+        irrelevant = self.candidate(
+            "governance",
+            citations=20,
+            title="A framework for university AI governance",
+        )
+        relevant = self.candidate(
+            "bystander",
+            title="The bystander effect in human-robot interaction",
+        )
+        for candidate in (irrelevant, relevant):
+            collect_papers.evaluate_attention(candidate, self.thresholds)
+
+        queue = collect_papers.select_review_queue(
+            [irrelevant, relevant], max_candidates=2, relevance_reserve=1
+        )
+
+        self.assertFalse(irrelevant["relevance"]["passed"])
+        self.assertEqual([candidate["key"] for candidate in queue], [relevant["key"]])
 
 
 class ReviewReportTests(TestCase):
@@ -226,7 +284,8 @@ class ReviewReportTests(TestCase):
             "social robot",
         )
         candidate["selected_for_review"] = True
-        candidate["selection_reason"] = "attention_gate"
+        candidate["selection_reason"] = "relevance_and_attention"
+        collect_papers.evaluate_relevance(candidate, RankingTests.relevance)
         collect_papers.evaluate_attention(candidate, RankingTests.thresholds)
 
         report = collect_papers.render_review_report(
@@ -246,7 +305,8 @@ class ReviewReportTests(TestCase):
         self.assertIn("- 収集元：openalex", report)
         self.assertIn("- 全候補：365件", report)
         self.assertIn("- 外部指標の取得警告：1件", report)
-        self.assertIn("- 選定理由：定量指標を通過", report)
+        self.assertIn("- 選定理由：関連性合格・定量指標を通過", report)
+        self.assertIn("- 関連性：", report)
 
 
 class XHistoryTests(TestCase):

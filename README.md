@@ -32,11 +32,11 @@ mkdocs serve
 python scripts/collect_papers.py
 ```
 
-過去30日間の候補をOpenAlexから取得し、Semantic Scholarの引用数とCrossref Event DataのReddit言及数を付与します。
+過去30日間の候補をOpenAlex、arXiv、ACL Anthology、Crossrefから取得し、Semantic Scholarの引用数とCrossref Event DataのReddit言及数を付与します。
 
 `X_BEARER_TOKEN` が設定されている場合は、X上の直近7日間の原投稿数も取得します。
 
-候補は `sources/inbox/` に保存され、定量指標と検索語の一致数から最大10件のレビューキューが生成されます。
+候補は `sources/inbox/` に保存されます。アンカー語、トピック語、掲載先から関連性を評価し、合格候補だけから最大10件のレビューキューを生成します。
 
 ## 新しい論文を追加する
 
